@@ -1,0 +1,221 @@
+{
+  "labels": [
+    { "name": "fase-3",   "color": "0E8A16", "description": "Fase 3 - Dados assincronos" },
+    { "name": "fase-4",   "color": "1D76DB", "description": "Fase 4 - Integracao com a planilha" },
+    { "name": "fase-5",   "color": "5319E7", "description": "Fase 5 - Cotacoes em tempo real" },
+    { "name": "fase-6",   "color": "D93F0B", "description": "Fase 6 - Telas e recursos que faltam" },
+    { "name": "fase-7",   "color": "B60205", "description": "Fase 7 - Polimento e publicacao" },
+    { "name": "ideia",    "color": "C5DEF5", "description": "Backlog futuro, sem prioridade" },
+    { "name": "frontend", "color": "FBCA04", "description": "Componentes, telas e estilo" },
+    { "name": "dados",    "color": "006B75", "description": "Fetch, estado e integracao de dados" },
+    { "name": "infra",    "color": "5A5A5A", "description": "Deploy, backend, seguranca" }
+  ],
+  "milestones": [
+    { "title": "Fase 3 - Dados assincronos",           "description": "Trocar a simulacao por busca real de dados." },
+    { "title": "Fase 4 - Integracao com a planilha",   "description": "Ligar o app na planilha via Apps Script." },
+    { "title": "Fase 5 - Cotacoes em tempo real",      "description": "Precos reais da B3 alimentando a rentabilidade." },
+    { "title": "Fase 6 - Telas e recursos que faltam", "description": "Dashboard, renda fixa, analise, simulador e rotas." },
+    { "title": "Fase 7 - Polimento e publicacao",      "description": "Design, responsividade, login e deploy." },
+    { "title": "Ideias / backlog futuro",              "description": "Sem prioridade definida." }
+  ],
+  "issues": [
+    {
+      "title": "Trocar a simulacao por fetch real",
+      "milestone": "Fase 3 - Dados assincronos",
+      "labels": ["fase-3", "dados"],
+      "body": "Hoje `buscarCarteira()` no `App.tsx` usa um `setTimeout` com uma lista fixa de ativos. Substituir por uma busca real (API publica ou planilha).\n\n**Pronto quando:**\n- [ ] `buscarCarteira()` faz `fetch` numa fonte externa\n- [ ] Os dados recebidos batem com o tipo `Ativo` de `tipos.ts`\n- [ ] O array fixo de exemplo foi removido do `App.tsx`"
+    },
+    {
+      "title": "Tratar erro na busca de dados",
+      "milestone": "Fase 3 - Dados assincronos",
+      "labels": ["fase-3", "dados"],
+      "body": "Se a API cair ou o usuario estiver sem internet, o app nao pode quebrar nem ficar preso em Carregando.\n\n**Pronto quando:**\n- [ ] `try/catch` em volta de cada `fetch`\n- [ ] Estado de erro no `useState`\n- [ ] Mensagem amigavel na tela com opcao de tentar de novo\n- [ ] Vale tanto para a carteira quanto para a cotacao do dolar"
+    },
+    {
+      "title": "Separar a logica de busca em api.ts",
+      "milestone": "Fase 3 - Dados assincronos",
+      "labels": ["fase-3", "dados"],
+      "body": "Tirar os `fetch` de dentro do `App.tsx` e centralizar num arquivo proprio, seguindo o que ja foi feito com `calculos.ts` e `tipos.ts`.\n\n**Pronto quando:**\n- [ ] Existe `src/components/utils/api.ts`\n- [ ] `buscaDolar` e `buscarCarteira` moram la, com retorno tipado\n- [ ] O `App.tsx` so importa e chama as funcoes"
+    },
+    {
+      "title": "Publicar o Apps Script da planilha como Web App",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "dados"],
+      "body": "Expor os dados da planilha como uma API JSON usando Google Apps Script.\n\n**Pronto quando:**\n- [ ] Script com `doGet` devolvendo a carteira em JSON\n- [ ] Implantado como Web App com acesso liberado\n- [ ] URL testada no navegador e devolvendo os dados"
+    },
+    {
+      "title": "Publicar a planilha para incorporacao (embed)",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "dados"],
+      "body": "Gerar o link de publicacao da planilha para poder embutir dentro do app.\n\n**Pronto quando:**\n- [ ] Planilha publicada na web\n- [ ] Link de embed guardado para usar na aba de visualizacao"
+    },
+    {
+      "title": "Conectar o fetch a URL real da planilha",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "dados"],
+      "body": "Ligar o `api.ts` na URL do Web App publicado.\n\n**Pronto quando:**\n- [ ] A carteira na tela vem da planilha\n- [ ] Editar a planilha e recarregar a pagina reflete a mudanca\n\nDepende de: publicar o Apps Script como Web App."
+    },
+    {
+      "title": "Mapear as colunas da planilha para o tipo Ativo",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "dados"],
+      "body": "O JSON que vem da planilha nao tem necessariamente os mesmos nomes de campo do tipo `Ativo`.\n\n**Pronto quando:**\n- [ ] Funcao de conversao (planilha para `Ativo`) escrita e tipada\n- [ ] Numeros chegam como numero, nao como texto\n- [ ] Linha incompleta ou vazia na planilha nao quebra o app"
+    },
+    {
+      "title": "Resolver CORS na busca da planilha",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "infra"],
+      "body": "O navegador pode bloquear a requisicao direta ao Apps Script.\n\n**Pronto quando:**\n- [ ] Requisicao funciona sem erro de CORS no console\n- [ ] Se precisar de backend intermediario, ele esta documentado no README"
+    },
+    {
+      "title": "Tela Sincronizar com status e data/hora",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "frontend"],
+      "body": "Dar visibilidade de quando os dados foram atualizados pela ultima vez.\n\n**Pronto quando:**\n- [ ] Botao de sincronizar que refaz a busca\n- [ ] Mostra data e hora da ultima sincronizacao\n- [ ] Mostra status: sincronizando, ok ou erro"
+    },
+    {
+      "title": "Aba de visualizacao da planilha embarcada",
+      "milestone": "Fase 4 - Integracao com a planilha",
+      "labels": ["fase-4", "frontend"],
+      "body": "Ver a planilha original sem sair do app.\n\n**Pronto quando:**\n- [ ] Nova aba na navegacao\n- [ ] Planilha carregando num `iframe`\n- [ ] Funciona no celular tambem"
+    },
+    {
+      "title": "Escolher a API de cotacoes da B3",
+      "milestone": "Fase 5 - Cotacoes em tempo real",
+      "labels": ["fase-5", "dados"],
+      "body": "Comparar as opcoes (brapi, bolsai ou outra) e decidir qual usar.\n\n**Pronto quando:**\n- [ ] Limite do plano gratuito verificado\n- [ ] Confirmado que cobre FIIs e acoes\n- [ ] Decisao registrada num comentario desta issue"
+    },
+    {
+      "title": "Buscar o preco atual de cada ativo",
+      "milestone": "Fase 5 - Cotacoes em tempo real",
+      "labels": ["fase-5", "dados"],
+      "body": "Consultar a cotacao de cada ticker da carteira.\n\n**Pronto quando:**\n- [ ] Uma unica requisicao para varios tickers (evitar N chamadas)\n- [ ] Ticker sem cotacao nao quebra a lista\n- [ ] Estado de carregamento enquanto busca"
+    },
+    {
+      "title": "Atualizar a rentabilidade com o preco real",
+      "milestone": "Fase 5 - Cotacoes em tempo real",
+      "labels": ["fase-5", "dados"],
+      "body": "Trocar o campo `preco` fixo pela cotacao vinda da API.\n\n**Pronto quando:**\n- [ ] Patrimonio, lucro e rentabilidade usam o preco real\n- [ ] A cor condicional (lucro/prejuizo) continua funcionando"
+    },
+    {
+      "title": "Guardar a chave da API com seguranca",
+      "milestone": "Fase 5 - Cotacoes em tempo real",
+      "labels": ["fase-5", "infra"],
+      "body": "Chave de API no codigo do front fica exposta para qualquer visitante.\n\n**Pronto quando:**\n- [ ] A chave nao aparece no bundle nem no repositorio\n- [ ] `.env` no `.gitignore` e `.env.example` versionado\n- [ ] Se precisar, requisicao passa por um backend/proxy"
+    },
+    {
+      "title": "Botao e atualizacao automatica de cotacoes",
+      "milestone": "Fase 5 - Cotacoes em tempo real",
+      "labels": ["fase-5", "frontend"],
+      "body": "Permitir atualizar os precos sem recarregar a pagina.\n\n**Pronto quando:**\n- [ ] Botao de atualizar\n- [ ] Atualizacao automatica em intervalo definido\n- [ ] O intervalo e limpo quando o componente sai da tela"
+    },
+    {
+      "title": "Dashboard completo com graficos",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Deixar o dashboard visual, nao so numeros.\n\n**Pronto quando:**\n- [ ] Grafico de rosca com a divisao por tipo (FII / Acao / Renda Fixa)\n- [ ] Grafico de evolucao do patrimonio\n- [ ] Biblioteca de graficos escolhida e anotada no README"
+    },
+    {
+      "title": "Tela de Renda Fixa (CDB, LCI, LCA, LIG)",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Renda fixa nao tem ticker nem cotacao, entao precisa de campos proprios.\n\n**Pronto quando:**\n- [ ] Tipo estendido com vencimento, indexador e taxa\n- [ ] Tela listando os papeis\n- [ ] `descobrirTipo` cobrindo esses casos"
+    },
+    {
+      "title": "Tela de analise de ativos (busca por ticker)",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Pesquisar um ticker e ver os dados dele, mesmo fora da carteira.\n\n**Pronto quando:**\n- [ ] Campo de busca por ticker\n- [ ] Mostra preco, tipo e indicadores basicos\n- [ ] Trata ticker inexistente"
+    },
+    {
+      "title": "Simulador de aportes",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Calculadora: dado um valor de aporte, mostrar como ele ficaria distribuido.\n\n**Pronto quando:**\n- [ ] Entrada do valor do aporte\n- [ ] Sugestao de distribuicao entre os ativos\n- [ ] Mostra o patrimonio resultante"
+    },
+    {
+      "title": "Leitor de relatorio de FII (PDF)",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Abrir o relatorio mensal de um FII dentro do app e poder grifar trechos.\n\n**Pronto quando:**\n- [ ] Upload ou link de PDF\n- [ ] PDF renderizado na tela\n- [ ] Grifos salvos entre sessoes"
+    },
+    {
+      "title": "Metas e carteira ideal",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Definir uma alocacao-alvo por tipo e ver o quanto falta para chegar la.\n\n**Pronto quando:**\n- [ ] Usuario define o percentual alvo de cada tipo\n- [ ] Comparacao entre alocacao atual e alvo\n- [ ] Mostra quanto falta aportar em cada uma"
+    },
+    {
+      "title": "Trocar a navegacao por react-router",
+      "milestone": "Fase 6 - Telas e recursos que faltam",
+      "labels": ["fase-6", "frontend"],
+      "body": "Hoje a troca de tela e um `useState` chamado `tela`. Com rotas de verdade cada tela ganha URL propria.\n\n**Pronto quando:**\n- [ ] `react-router` instalado e configurado\n- [ ] Cada tela tem sua URL\n- [ ] Voltar e atualizar a pagina funcionam\n- [ ] O estado `tela` foi removido do `App.tsx`"
+    },
+    {
+      "title": "Design final: identidade navy + dourado",
+      "milestone": "Fase 7 - Polimento e publicacao",
+      "labels": ["fase-7", "frontend"],
+      "body": "Aplicar a identidade visual em todo o app.\n\n**Pronto quando:**\n- [ ] Paleta definida como variaveis no `index.css`\n- [ ] Cards, botoes e tipografia seguindo o padrao\n- [ ] Nenhuma cor solta espalhada pelos componentes"
+    },
+    {
+      "title": "Responsividade no celular",
+      "milestone": "Fase 7 - Polimento e publicacao",
+      "labels": ["fase-7", "frontend"],
+      "body": "O app precisa funcionar bem na tela pequena.\n\n**Pronto quando:**\n- [ ] Todas as telas testadas em 375px de largura\n- [ ] Nenhuma rolagem horizontal\n- [ ] Menu de navegacao adaptado\n- [ ] O hook `use-mobile` aproveitado onde fizer sentido"
+    },
+    {
+      "title": "Tratar estados vazios e de erro em todas as telas",
+      "milestone": "Fase 7 - Polimento e publicacao",
+      "labels": ["fase-7", "frontend"],
+      "body": "Carteira vazia, filtro sem resultado e falha de busca precisam de uma tela decente.\n\n**Pronto quando:**\n- [ ] Cada lista tem estado vazio com texto explicativo\n- [ ] Cada busca tem estado de erro\n- [ ] Nenhuma tela fica em branco sem explicacao"
+    },
+    {
+      "title": "Login / autenticacao",
+      "milestone": "Fase 7 - Polimento e publicacao",
+      "labels": ["fase-7", "infra"],
+      "body": "So faz sentido se o app for multiusuario. Decidir isso antes de implementar.\n\n**Pronto quando:**\n- [ ] Decidido se vai ser multiusuario\n- [ ] Se sim: login funcionando e carteira separada por usuario\n- [ ] Se nao: fechar esta issue com a justificativa"
+    },
+    {
+      "title": "Publicar o app na internet (deploy)",
+      "milestone": "Fase 7 - Polimento e publicacao",
+      "labels": ["fase-7", "infra"],
+      "body": "Colocar o app no ar para acessar de qualquer lugar.\n\n**Pronto quando:**\n- [ ] Plataforma escolhida (Vercel, Netlify ou GitHub Pages)\n- [ ] `npm run build` passando sem erro de tipo\n- [ ] Deploy automatico a cada push na `main`\n- [ ] URL publica no README"
+    },
+    {
+      "title": "Rodape: nao e recomendacao de investimento",
+      "milestone": "Fase 7 - Polimento e publicacao",
+      "labels": ["fase-7", "frontend"],
+      "body": "Aviso legal visivel, ja que o app mostra dados financeiros.\n\n**Pronto quando:**\n- [ ] Rodape presente em todas as telas\n- [ ] Texto deixando claro que e ferramenta de acompanhamento pessoal"
+    },
+    {
+      "title": "Historico de aportes e proventos mes a mes",
+      "milestone": "Ideias / backlog futuro",
+      "labels": ["ideia"],
+      "body": "Registrar cada aporte e cada provento recebido, com visao mensal.\n\nIdeia do backlog futuro, sem prioridade definida."
+    },
+    {
+      "title": "Exportar relatorio da carteira em PDF",
+      "milestone": "Ideias / backlog futuro",
+      "labels": ["ideia"],
+      "body": "Gerar um PDF com a posicao atual da carteira.\n\nIdeia do backlog futuro, sem prioridade definida."
+    },
+    {
+      "title": "Notificacoes de dividendos",
+      "milestone": "Ideias / backlog futuro",
+      "labels": ["ideia"],
+      "body": "Avisar quando um ativo da carteira anunciar ou pagar provento.\n\nIdeia do backlog futuro, sem prioridade definida."
+    },
+    {
+      "title": "Comparar a carteira com IFIX e CDI",
+      "milestone": "Ideias / backlog futuro",
+      "labels": ["ideia"],
+      "body": "Mostrar a rentabilidade da carteira lado a lado com os indices de referencia.\n\nIdeia do backlog futuro, sem prioridade definida."
+    },
+    {
+      "title": "Modo escuro / claro",
+      "milestone": "Ideias / backlog futuro",
+      "labels": ["ideia"],
+      "body": "Alternar tema, guardando a preferencia do usuario.\n\nIdeia do backlog futuro, sem prioridade definida."
+    }
+  ]
+}

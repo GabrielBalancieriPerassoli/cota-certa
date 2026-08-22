@@ -1,0 +1,88 @@
+name: Criar backlog de issues
+
+# Le o arquivo .github/backlog.json e cria as labels, milestones e issues
+# correspondentes no proprio repositorio. E idempotente: rodar de novo nao
+# duplica nada, so cria o que ainda nao existe.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/backlog.json
+      - .github/workflows/criar-backlog.yml
+
+jobs:
+  criar:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const dados = JSON.parse(fs.readFileSync('.github/backlog.json', 'utf8'));
+            const { owner, repo } = context.repo;
+
+            // ---- labels ----
+            for (const label of dados.labels) {
+              try {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+                core.info(`label criada: ${label.name}`);
+              } catch (erro) {
+                if (erro.status === 422) core.info(`label ja existe: ${label.name}`);
+                else throw erro;
+              }
+            }
+
+            // ---- milestones ----
+            const existentes = await github.paginate(github.rest.issues.listMilestones, {
+              owner, repo, state: 'all', per_page: 100,
+            });
+            const numeroDaMilestone = {};
+            for (const m of existentes) numeroDaMilestone[m.title] = m.number;
+
+            for (const m of dados.milestones) {
+              if (numeroDaMilestone[m.title]) {
+                core.info(`milestone ja existe: ${m.title}`);
+                continue;
+              }
+              const criada = await github.rest.issues.createMilestone({ owner, repo, ...m });
+              numeroDaMilestone[m.title] = criada.data.number;
+              core.info(`milestone criada: ${m.title}`);
+            }
+
+            // ---- issues ----
+            const issuesAtuais = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'all', per_page: 100,
+            });
+            const titulosUsados = new Set(issuesAtuais.map((i) => i.title));
+
+            let criadas = 0;
+            for (const issue of dados.issues) {
+              if (titulosUsados.has(issue.title)) {
+                core.info(`issue ja existe: ${issue.title}`);
+                continue;
+              }
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title: issue.title,
+                body: issue.body,
+                labels: issue.labels,
+                milestone: numeroDaMilestone[issue.milestone],
+              });
+              criadas++;
+              core.info(`issue criada: ${issue.title}`);
+              // respiro entre chamadas para nao esbarrar no limite de criacao
+              await new Promise((r) => setTimeout(r, 1500));
+            }
+
+            core.summary
+              .addHeading('Backlog do Cota Certa')
+              .addRaw(`${criadas} issue(s) criada(s) nesta execucao.`)
+              .write();

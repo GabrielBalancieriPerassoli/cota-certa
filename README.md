@@ -198,3 +198,17 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 (mas evite commitar a remoção do `package-lock.json` — ele garante que todo mundo instale as mesmas versões)
+
+---
+
+## Backlog
+
+As tarefas do projeto ficam nas [issues](https://github.com/GabrielBalancieriPerassoli/cota-certa/issues), organizadas por fase nas [milestones](https://github.com/GabrielBalancieriPerassoli/cota-certa/milestones).
+
+Como trabalhar em dupla:
+
+1. Escolha uma issue e **se atribua** a ela (`Assignees`) — uma pessoa por tarefa, pra ninguém mexer no mesmo arquivo ao mesmo tempo.
+2. Crie uma branch pra ela: `git checkout -b feat/nome-curto`.
+3. Ao terminar, abra um Pull Request citando a issue (`Closes #12`) — o GitHub fecha a issue sozinho quando o PR entrar.
+
+Pra adicionar tarefas novas: edite [.github/backlog.json](.github/backlog.json) e dê push na `main`. O workflow [criar-backlog.yml](.github/workflows/criar-backlog.yml) cria as issues que ainda não existem, sem duplicar as antigas.
