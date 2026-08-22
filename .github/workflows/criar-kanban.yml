@@ -1,0 +1,125 @@
+name: Criar quadro Kanban
+
+# Cria um Project (Kanban) na sua conta e joga todas as issues abertas do
+# repositorio na coluna "Todo". E idempotente: se o quadro ja existir, ele
+# apenas adiciona as issues que ainda nao estao la.
+#
+# PRE-REQUISITO: um secret chamado PROJETO_TOKEN no repositorio, com um
+# Personal Access Token (classic) que tenha os escopos "repo" e "project".
+# O GITHUB_TOKEN padrao do Actions nao serve: Projects pertencem a conta,
+# nao ao repositorio, e ele nao tem permissao para mexer neles.
+
+on:
+  workflow_dispatch:
+    inputs:
+      titulo:
+        description: Nome do quadro
+        required: true
+        default: Cota Certa
+
+jobs:
+  kanban:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJETO_TOKEN }}
+          script: |
+            const titulo = context.payload.inputs.titulo || 'Cota Certa';
+            const { owner, repo } = context.repo;
+
+            // ---- ids do repositorio, do dono e dos projects existentes ----
+            const info = await github.graphql(`
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) { id }
+                repositoryOwner(login: $owner) {
+                  id
+                  ... on User         { projectsV2(first: 100) { nodes { id title number url } } }
+                  ... on Organization { projectsV2(first: 100) { nodes { id title number url } } }
+                }
+              }`, { owner, repo });
+
+            const idDoRepo = info.repository.id;
+            const idDoDono = info.repositoryOwner.id;
+            const projetos = info.repositoryOwner.projectsV2?.nodes ?? [];
+
+            // ---- cria o project, se ainda nao existir ----
+            let projeto = projetos.find((p) => p.title === titulo);
+            if (projeto) {
+              core.info(`quadro ja existe: ${projeto.url}`);
+            } else {
+              const criado = await github.graphql(`
+                mutation($dono: ID!, $titulo: String!) {
+                  createProjectV2(input: { ownerId: $dono, title: $titulo }) {
+                    projectV2 { id title number url }
+                  }
+                }`, { dono: idDoDono, titulo });
+              projeto = criado.createProjectV2.projectV2;
+              core.info(`quadro criado: ${projeto.url}`);
+
+              await github.graphql(`
+                mutation($projeto: ID!, $repo: ID!) {
+                  linkProjectV2ToRepository(input: { projectId: $projeto, repositoryId: $repo }) {
+                    repository { name }
+                  }
+                }`, { projeto: projeto.id, repo: idDoRepo });
+              core.info('quadro vinculado ao repositorio');
+            }
+
+            // ---- descobre o campo Status e a opcao Todo ----
+            const campos = await github.graphql(`
+              query($projeto: ID!) {
+                node(id: $projeto) {
+                  ... on ProjectV2 {
+                    fields(first: 50) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id name options { id name }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`, { projeto: projeto.id });
+
+            const campoStatus = campos.node.fields.nodes.find((c) => c && c.name === 'Status');
+            const opcaoTodo = campoStatus?.options.find((o) => /todo|a fazer/i.test(o.name));
+
+            // ---- adiciona as issues abertas ----
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', per_page: 100,
+            });
+
+            let adicionadas = 0;
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              const item = await github.graphql(`
+                mutation($projeto: ID!, $conteudo: ID!) {
+                  addProjectV2ItemById(input: { projectId: $projeto, contentId: $conteudo }) {
+                    item { id }
+                  }
+                }`, { projeto: projeto.id, conteudo: issue.node_id });
+
+              if (campoStatus && opcaoTodo) {
+                await github.graphql(`
+                  mutation($projeto: ID!, $item: ID!, $campo: ID!, $opcao: String!) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $projeto, itemId: $item, fieldId: $campo,
+                      value: { singleSelectOptionId: $opcao }
+                    }) { projectV2Item { id } }
+                  }`, {
+                    projeto: projeto.id, item: item.addProjectV2ItemById.item.id,
+                    campo: campoStatus.id, opcao: opcaoTodo.id,
+                  });
+              }
+
+              adicionadas++;
+              core.info(`#${issue.number} ${issue.title}`);
+              await new Promise((r) => setTimeout(r, 700));
+            }
+
+            core.summary
+              .addHeading('Kanban do Cota Certa')
+              .addRaw(`${adicionadas} issue(s) no quadro: ${projeto.url}`)
+              .write();
