@@ -1,0 +1,18 @@
+.card-ativo {
+    background: #13233A;
+    border: 1px solid rgba(233, 240, 248, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    color: #EAF0F8;
+    font-family: sans-serif;
+}
+
+.card-ativo h3 {
+    margin: 0 0 8px 0;
+    color: #CBA35A;
+}
+
+.card-ativo p {
+    margin: 4px 0;
+}
