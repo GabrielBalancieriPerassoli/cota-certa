@@ -1,4 +1,4 @@
-# Mercatus
+# Cota Certa
 
 Dashboard de carteira de investimentos (FIIs e ações) feito com **React 19 + TypeScript + Vite + Tailwind CSS 4**.
 
