@@ -1,16 +1,17 @@
 
 import Ativo from './components/ui/Ativo'
 import { useState, useEffect } from 'react'
-import descobrirTipo from './components/utils/ativos'
+import { classificarAtivos } from './components/utils/ativos'
 import { calcularPatrimonio, calcularInvestido } from './components/utils/calculos'
 import CarteiraPorTipo from './components/ui/CarteiraPorTipo'
-import type { Ativo as AtivoTipo } from './components/utils/tipos'
+import { GraficoComposicao } from './components/ui/GraficoComposicao'
+import type { Ativo as AtivoTipo, AtivoComTipo, TipoAtivo } from './components/utils/tipos'
 
 function App() {
   const [dolar, setDolar] = useState("")
   const [tela, setTela] = useState("dashboard")
-  const [filtro, setFiltro] = useState("Todos")
-  const [carteira, setCarteira] = useState<AtivoTipo[]>([])
+  const [filtro, setFiltro] = useState<"Todos" | TipoAtivo>("Todos")
+  const [carteira, setCarteira] = useState<AtivoComTipo[]>([])
 
   useEffect(() => {
     buscaDolar()
@@ -30,15 +31,19 @@ function App() {
     // simula a espera de uma busca real (1 segundo)
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const dadosRecebidos = [
+    const dadosRecebidos : AtivoTipo[] = [
       { ticker: "MXRF11", quantidade: 10, preco: 9.85, precoMedio: 9.80 },
       { ticker: "HGLG11", quantidade: 60, preco: 151.00, precoMedio: 158.00 },
       { ticker: "KNCR11", quantidade: 110, preco: 102.30, precoMedio: 99.50 },
       { ticker: "XPML11", quantidade: 90, preco: 107.50, precoMedio: 104.00 },
-      { ticker: "BBAS3",  quantidade: 2, preco: 50.5, precoMedio: 50.00 },
+      { ticker: "BBAS3",  quantidade: 70, preco: 50.5, precoMedio: 50.00 },
+      { ticker: "KLBN3",  quantidade: 50, preco: 15.0, precoMedio: 13.50 },
+      { ticker: "BOVA11", quantidade: 50, preco: 20.0, precoMedio: 13.50 },
+      { ticker: "KLBN11", quantidade: 50, preco: 12.0, precoMedio: 20.50 },
+      { ticker: "SANB11", quantidade: 15, preco: 30.0, precoMedio: 20.50 },
     ]
 
-    setCarteira(dadosRecebidos)
+    setCarteira(await classificarAtivos(dadosRecebidos))
   }
 
   if (carteira.length === 0) {
@@ -55,16 +60,16 @@ function App() {
 
   const carteiraFiltrada = carteira.filter((ativo) => {
     if (filtro === "Todos") return true
-    return descobrirTipo(ativo.ticker) === filtro
+    return ativo.tipo === filtro
   })
 
   const ativos = carteira.reduce((soma) => {
     return soma + 1
   }, 0)
 
-  const fiis = carteira.filter((ativo) => descobrirTipo(ativo.ticker) === "FII").length
-  const acoes = carteira.filter((ativo) => descobrirTipo(ativo.ticker) === "Ação").length
-  const rendaFixa = carteira.filter((ativo) => descobrirTipo(ativo.ticker) === "Renda Fixa").length
+  const fiis = carteira.filter((ativo) => ativo.tipo === "FII").length
+  const acoes = carteira.filter((ativo) => ativo.tipo === "Ação").length
+  const rendaFixa = carteira.filter((ativo) => ativo.tipo === "Renda Fixa").length
 
   const maiorPos = carteira.reduce((campeao, ativo) => {
     const valorCampeao = campeao.quantidade * campeao.preco 
@@ -104,6 +109,7 @@ function App() {
               quantidade={ativos.quantidade}
               preco={ativos.preco}
               precoMedio={ativos.precoMedio}
+              tipo={ativos.tipo}
             />
           ))}
         </div>
@@ -115,6 +121,7 @@ function App() {
           <h3>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</h3>
           <h3 style={{ color: lucro >= 0 ? "green" : "red" }}>Lucro: {real.format(lucro)}</h3>
           <h3 style={{ color: rentabilidade >= 0 ? "green " : "red" }}>Rentabilidade: {rentabilidade.toFixed(2)}</h3>
+          <GraficoComposicao carteira={carteira} />
         </div>
       )}
 

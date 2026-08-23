@@ -1,18 +1,17 @@
 import Ativo from './Ativo'
-import descobrirTipo from '../utils/ativos'
 import { calcularInvestido } from '../utils/calculos'
-import type { Ativo as AtivoData } from '../utils/tipos'
+import type { AtivoComTipo, TipoAtivo } from '../utils/tipos'
 
 type CarteiraPorTipoProps = {
-    tipo: string
-    carteira: AtivoData[]
+    tipo: TipoAtivo
+    carteira: AtivoComTipo[]
 }
 
 function CarteiraPorTipo(props: CarteiraPorTipoProps) {
     const real = new Intl.NumberFormat("pt-BR", {style: "currency", currency: "BRL"})
 
     const filtrada = props.carteira.filter((ativo) => {
-        return descobrirTipo(ativo.ticker) === props.tipo
+        return ativo.tipo === props.tipo
     })
 
     return (
@@ -21,6 +20,7 @@ function CarteiraPorTipo(props: CarteiraPorTipoProps) {
             {filtrada.map((ativo) => (
                 <Ativo
                     key={ativo.ticker}
+                    tipo={ativo.tipo}
                     ticker={ativo.ticker}
                     quantidade={ativo.quantidade}
                     preco={ativo.preco}

@@ -1,13 +1,8 @@
 
-import descobrirTipo from '../utils/ativos'
+import type { AtivoComTipo } from '../utils/tipos'
 import './Ativo.css'
 
-type AtivoProps = {
-  ticker: string
-  quantidade: number 
-  preco: number
-  precoMedio: number
-}
+type AtivoProps = AtivoComTipo
 
 function Ativo(props: AtivoProps) {
   const real = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
@@ -20,7 +15,7 @@ function Ativo(props: AtivoProps) {
       <p>Quantidade: {props.quantidade}</p>
       <p>{props.quantidade} cotas · {real.format(props.preco)}</p>
       <p>Total: {real.format(valorTotal)}</p>
-      <p>Tipo: {descobrirTipo(props.ticker)}</p>
+      <p>Tipo: {props.tipo}</p>
       <p style={ { color: rentabilidade >= 0 ? "green" : "red" } }>
         Rentabilidade: {rentabilidade.toFixed(2)}%
       </p>
