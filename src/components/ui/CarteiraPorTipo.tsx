@@ -32,4 +32,4 @@ function CarteiraPorTipo(props: CarteiraPorTipoProps) {
     )
 }
 
-export default CarteiraPorTipo
+export default CarteiraPorTipo 

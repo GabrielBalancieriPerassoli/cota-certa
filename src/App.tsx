@@ -1,11 +1,11 @@
 
 import Ativo from './components/ui/Ativo'
 import { useState, useEffect } from 'react'
-import { classificarAtivos } from './components/utils/ativos'
 import { calcularPatrimonio, calcularInvestido } from './components/utils/calculos'
 import CarteiraPorTipo from './components/ui/CarteiraPorTipo'
 import { GraficoComposicao } from './components/ui/GraficoComposicao'
-import type { Ativo as AtivoTipo, AtivoComTipo, TipoAtivo } from './components/utils/tipos'
+import type { AtivoComTipo, TipoAtivo } from './components/utils/tipos'
+import { buscarCarteira } from './components/utils/api'
 
 function App() {
   const [dolar, setDolar] = useState("")
@@ -24,27 +24,12 @@ function App() {
   }
 
   useEffect(() => {
-    buscarCarteira()
+    async function carregar() {
+      const dados = await buscarCarteira()
+      setCarteira(dados)
+    }
+    carregar()
   }, [])
-
-  async function buscarCarteira() {
-    // simula a espera de uma busca real (1 segundo)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    const dadosRecebidos : AtivoTipo[] = [
-      { ticker: "MXRF11", quantidade: 10, preco: 9.85, precoMedio: 9.80 },
-      { ticker: "HGLG11", quantidade: 60, preco: 151.00, precoMedio: 158.00 },
-      { ticker: "KNCR11", quantidade: 110, preco: 102.30, precoMedio: 99.50 },
-      { ticker: "XPML11", quantidade: 90, preco: 107.50, precoMedio: 104.00 },
-      { ticker: "BBAS3",  quantidade: 70, preco: 50.5, precoMedio: 50.00 },
-      { ticker: "KLBN3",  quantidade: 50, preco: 15.0, precoMedio: 13.50 },
-      { ticker: "BOVA11", quantidade: 50, preco: 20.0, precoMedio: 13.50 },
-      { ticker: "KLBN11", quantidade: 50, preco: 12.0, precoMedio: 20.50 },
-      { ticker: "SANB11", quantidade: 15, preco: 30.0, precoMedio: 20.50 },
-    ]
-
-    setCarteira(await classificarAtivos(dadosRecebidos))
-  }
 
   if (carteira.length === 0) {
     return <p>Carregando carteira...</p>

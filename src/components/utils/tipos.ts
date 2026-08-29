@@ -1,4 +1,4 @@
-export type TipoAtivo = "Ação" | "FII" | "Renda Fixa" | "BDR" | "Desconhecido"
+export type TipoAtivo = "Ação" | "FII" | "ETF" | "Renda Fixa" | "BDR" | "Desconhecido"
 
 export type AtivoComTipo = Ativo & {
     tipo:TipoAtivo

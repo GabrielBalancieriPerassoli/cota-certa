@@ -15,7 +15,11 @@ async function descobrirTipo(ticker: string): Promise<TipoAtivo> {
   }
 
   const dados = await resposta.json()
-  const papeis : {stock: string, type : string} [] = dados.stocks ?? []
+  const papeis: {
+    stock: string
+    type: string
+    subType: string
+  }[] = dados.stocks ?? []
   const ativo = papeis.find((stock) => stock.stock.toUpperCase() === t)
   
   if(!ativo) {
@@ -23,20 +27,39 @@ async function descobrirTipo(ticker: string): Promise<TipoAtivo> {
   }
 
   /*
-  A API BRAPI retorna:"Stock -> Acao", "Fund -> FII", "Bdr -> Recibo de acao estrangeira listada no exterior" 
-  */
+    A API BRAPI retorna:
 
-  if(ativo.type === "fund") {
+    type:
+    "stock" -> Ação
+    "fund"  -> Fundo
+    "bdr"   -> BDR
+
+    subType:
+    "fii"   -> FII
+    "etf"   -> ETF
+    "stock" -> Ação
+    "unit"  -> Unit
+    "bdr"   -> BDR
+  */
+ 
+  if(ativo.subType === "fii") {
     return "FII"
   }
+
+  if (ativo.subType === "etf") {
+    return "ETF"
+  }
+
   if(ativo.type === "stock") {
     return "Ação"
   }
+
   if(ativo.type === "bdr") {
     return "BDR"
   }
 
   return "Desconhecido"
+
 }
 
 export async function classificarAtivos(carteira: Ativo[]): Promise<AtivoComTipo[]> {
@@ -53,16 +76,3 @@ export async function classificarAtivos(carteira: Ativo[]): Promise<AtivoComTipo
 }
 
 export default descobrirTipo
-
-/* function descobrirTipo(ticker: string): string {
-  if (ticker.endsWith("11")) {
-    return "FII"
-  } else if (ticker.endsWith("3") || (ticker.endsWith("4"))) {
-    return "Ação"
-  } else {
-    return "Renda Fixa"
-  }
-}
-
-export default descobrirTipo
-*/
