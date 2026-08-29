@@ -1,11 +1,15 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import type { AtivoComTipo } from '../utils/tipos'
 
 const CORES: Record<string, string> = {
   FII: "#0f766e",
   "Ação": "#1e3a8a",
   "Renda Fixa": "#c9a227",
+  ETF: "#7c3aed",
+  BDR: "#b91c1c",
 }
+
+const real = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
 
 export function GraficoComposicao({ carteira }: { carteira: AtivoComTipo[] }) {
   const porTipo = carteira.reduce<Record<string, number>>((acc, ativo) => {
@@ -15,17 +19,24 @@ export function GraficoComposicao({ carteira }: { carteira: AtivoComTipo[] }) {
     return acc
   }, {})
 
-  const dados = Object.entries(porTipo).map(([tipo, valor]) => ({ tipo, valor }))
+  // adiciona a cor diretamente em cada item de dados
+  const dados = Object.entries(porTipo).map(([tipo, valor]) => ({
+    tipo,
+    valor,
+    fill: CORES[tipo] ?? "#999"
+  }))
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
-        <Pie data={dados} dataKey="valor" nameKey="tipo" innerRadius={60} outerRadius={100}>
-          {dados.map((entry) => (
-            <Cell key={entry.tipo} fill={CORES[entry.tipo] ?? "#999"} />
-          ))}
-        </Pie>
-        <Tooltip />
+        <Pie
+          data={dados}
+          dataKey="valor"
+          nameKey="tipo"
+          innerRadius={60}
+          outerRadius={100}
+        />
+        <Tooltip formatter={(value) => real.format(value as number)} />
         <Legend />
       </PieChart>
     </ResponsiveContainer>
