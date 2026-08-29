@@ -1,15 +1,35 @@
 import type { Ativo, AtivoComTipo } from './tipos'
 import { descobrirTipo } from './api'
 
-export async function classificarAtivos(carteira: Ativo[]): Promise<AtivoComTipo[]> {
-  return Promise.all(
-    carteira.map(async (ativo) => {
+export async function classificarAtivos(
+  ativos: Ativo[]
+): Promise<AtivoComTipo[]> {
+
+  const resultados = await Promise.all(
+    ativos.map(async (a) => {
+
       try {
-        return { ...ativo, tipo: await descobrirTipo(ativo.ticker) }
-      }
-      catch {
-        throw new Error(`Erro ao classificar o ativo ${ativo.ticker}`)
+
+        const tipo = await descobrirTipo(a.ticker)
+
+        return {
+          ...a,
+          tipo
+        }
+
+      } catch (e) {
+
+        console.error(
+          `Erro ao classificar o ativo ${a.ticker}:`,
+          e
+        )
+
+        return null
       }
     })
+  )
+
+  return resultados.filter(
+    (a): a is AtivoComTipo => a !== null
   )
 }

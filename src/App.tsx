@@ -6,12 +6,14 @@ import CarteiraPorTipo from './components/ui/CarteiraPorTipo'
 import { GraficoComposicao } from './components/ui/GraficoComposicao'
 import type { AtivoComTipo, TipoAtivo } from './components/utils/tipos'
 import { buscarCarteira } from './components/utils/api'
+import { DialogExibeErro } from './components/ui/DialogExibeErro'
 
 function App() {
   const [dolar, setDolar] = useState("")
   const [tela, setTela] = useState("dashboard")
   const [filtro, setFiltro] = useState<"Todos" | TipoAtivo>("Todos")
   const [carteira, setCarteira] = useState<AtivoComTipo[]>([])
+  const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
     buscaDolar()
@@ -25,8 +27,16 @@ function App() {
 
   useEffect(() => {
     async function carregar() {
-      const dados = await buscarCarteira()
-      setCarteira(dados)
+      try {
+        const dados = await buscarCarteira()
+        setCarteira(dados)
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setErro(e.message)
+        } else {
+          setErro(String(e))
+        }
+      }
     }
     carregar()
   }, [])
@@ -68,6 +78,13 @@ function App() {
 
   return (
     <>
+      {erro && (
+        <DialogExibeErro
+            tipo="erro"
+            mensagem={erro}
+            onClose={() => setErro(null)}
+          />
+      )}
       <h1>CotaCerta</h1>
       <nav>
         <button onClick={() => setTela("dashboard")}>Dashboard</button>

@@ -10,3 +10,8 @@ export type Ativo = {
     preco: number 
     precoMedio: number
 }
+
+export type ResultadoCarteira = {
+  carteira: AtivoComTipo[]
+  ativosNaoEncontrados: string[]
+}

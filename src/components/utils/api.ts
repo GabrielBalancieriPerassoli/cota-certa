@@ -1,11 +1,20 @@
-import type { Ativo, AtivoComTipo, TipoAtivo } from './tipos'
-import { classificarAtivos } from './ativos'
+import type { Ativo, AtivoComTipo, TipoAtivo } from "./tipos"
+import { classificarAtivos } from "./ativos"
 
 const token = import.meta.env.VITE_BRAPI_API_TOKEN ?? ""
 
 export async function descobrirTipo(ticker: string): Promise<TipoAtivo> {
+
+  const rendaFixaPrefixos = ["TESOURO", "CDB", "LCI", "LCA", "DEBÊNTURE"]
+
   const t = ticker.trim().toUpperCase()
 
+  // 1. Verifica se é renda fixa por prefixo
+  if (rendaFixaPrefixos.some(prefixo => t.startsWith(prefixo))) {
+    return "Renda Fixa"
+  }
+
+  // 2. Consulta na BRAPI
   const resposta = await fetch(`https://brapi.dev/api/quote/list?search=${t}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
@@ -15,16 +24,8 @@ export async function descobrirTipo(ticker: string): Promise<TipoAtivo> {
   }
 
   const dados = await resposta.json()
-  const papeis: {
-    stock: string
-    type: string
-    subType: string
-  }[] = dados.stocks ?? []
+  const papeis: { stock: string; type: string; subType: string }[] = dados.stocks ?? []
   const ativo = papeis.find((stock) => stock.stock.toUpperCase() === t)
-  
-  if(!ativo) {
-    return "Renda Fixa"
-  }
 
   /*
     A API BRAPI retorna:
@@ -41,65 +42,59 @@ export async function descobrirTipo(ticker: string): Promise<TipoAtivo> {
     "unit"  -> Unit
     "bdr"   -> BDR
   */
-
-  if(ativo.subType === "fii") {
-    return "FII"
+  if (!ativo) {
+    throw new Error(`Ativo ${ticker} não encontrado`)
   }
 
-  if (ativo.subType === "etf") {
-    return "ETF"
-  }
-
-  if(ativo.type === "stock") {
-    return "Ação"
-  }
-
-  if(ativo.type === "bdr") {
-    return "BDR"
-  }
-
+  if (ativo.subType === "fii") return "FII"
+  if (ativo.subType === "etf") return "ETF"
+  if (ativo.type === "stock") return "Ação"
+  if (ativo.type === "bdr") return "BDR"
   return "Desconhecido"
 
 }
 
-async function buscarAtivo(ticker: string): Promise<Ativo> {
-    const resposta = await fetch(`https://brapi.dev/api/quote/${ticker}?token=${token}`) 
-    
-    if (!resposta.ok) {
-        throw new Error(`Erro ao buscar ativo ${ticker}: ${resposta.status}`)
-    }
+export async function buscarAtivo(ticker: string): Promise<Ativo | null> {
+
+  try {
+
+    const resposta = await fetch(`https://brapi.dev/api/quote/${ticker}?token=${token}`)
+    if (!resposta.ok) throw new Error(`Erro ao buscar ativo ${ticker}: ${resposta.status}`)
 
     const dados = await resposta.json()
-
-    if (!dados.results || dados.results.length === 0) {
-        throw new Error(`Ativo ${ticker} não encontrado`)
-    }
+    if (!dados.results || dados.results.length === 0) throw new Error(`Ativo ${ticker} não encontrado`)
 
     const item = dados.results[0]
-
     return {
-        ticker: item.symbol,
-        quantidade: 100,
-        preco: item.regularMarketPrice,
-        precoMedio: item.regularMarketPrice * 0.95, 
+      ticker: item.symbol,
+      quantidade: 100,
+      preco: item.regularMarketPrice,
+      precoMedio: item.regularMarketPrice * 0.95,
     }
+
+  } catch (erro) {
+
+    console.error("Erro em buscarAtivo:", erro)
+    return null
+
+  }
+
 }
 
 export async function buscarCarteira(): Promise<AtivoComTipo[]> {
 
-    try {
+  try {
 
-        const tickers = ["MXRF11", "HGLG11", "GARE11", "ITUB4", "BBSE3", "IVVB11", "AAPL34", "BOVA11"]
+    const tickers = ["MXRF11", "HGLG11", "GARE11", "ITUB4", "BBSE3", "IVVB11", "AAPL34", "BOVA11", "XXXX"]
+    const ativos = (await Promise.all(tickers.map((t) => buscarAtivo(t)))).filter((a): a is Ativo => a !== null)
 
-        // Etapa 1: busca os dados de mercado de cada ticker
-        const ativos = await Promise.all(tickers.map((t) => buscarAtivo(t)))
+    return await classificarAtivos(ativos)
 
-        // Etapa 2: classifica (adiciona o tipo) via API
-        return await classificarAtivos(ativos)
-        
-    } catch (erro) {
-        console.error("Erro ao buscar carteira:", erro)
-        return []   
-    }
+  } catch (erro) {
+
+    console.error("Erro ao buscar carteira:", erro)
+    return []
+
+  }
 
 }
