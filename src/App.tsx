@@ -5,25 +5,31 @@ import { calcularPatrimonio, calcularInvestido } from './components/utils/calcul
 import CarteiraPorTipo from './components/ui/CarteiraPorTipo'
 import { GraficoComposicao } from './components/ui/GraficoComposicao'
 import type { AtivoComTipo, TipoAtivo } from './components/utils/tipos'
-import { buscarCarteira } from './components/utils/api'
+import { buscarCarteira, buscaDolar } from './components/utils/api'
 import { DialogExibeErro } from './components/ui/DialogExibeErro'
 
 function App() {
   const [dolar, setDolar] = useState("")
   const [tela, setTela] = useState("dashboard")
-  const [filtro, setFiltro] = useState<"Todos" | TipoAtivo>("Todos")
+  const [filtro] = useState<"Todos" | TipoAtivo>("Todos")
   const [carteira, setCarteira] = useState<AtivoComTipo[]>([])
   const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
-    buscaDolar()
+    async function carregar() {
+      try {
+        const dados = await buscaDolar()
+        setDolar(dados.USDBRL.bid)
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setErro(e.message)
+        } else {
+          setErro(String(e))
+        }
+      }
+    }
+    carregar()
   }, [])
-
-  async function buscaDolar() {
-    const resposta = await fetch("https://economia.awesomeapi.com.br/last/USD-BRL")
-    const dados = await resposta.json()
-    setDolar(dados.USDBRL.bid)
-  }
 
   useEffect(() => {
     async function carregar() {
@@ -96,11 +102,6 @@ function App() {
         <button onClick={buscaDolar}>Buscar dólar</button>
         <p>Dólar: {dolar}</p>
       </nav>
-      <div>
-        <button onClick={() => setFiltro("Todos")}>Todos</button>
-        <button onClick={() => setFiltro("FII")}>FIIs</button>
-        <button onClick={() => setFiltro("Ação")}>Ação</button>
-      </div>
 
       {tela === "carteira" && (
         <div>

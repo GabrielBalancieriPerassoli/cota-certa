@@ -98,3 +98,20 @@ export async function buscarCarteira(): Promise<AtivoComTipo[]> {
   }
 
 }
+
+export async function buscaDolar() {
+
+  try {
+
+    const resposta = await fetch("https://economia.awesomeapi.com.br/last/USD-BRL")
+    const dados = await resposta.json()
+    
+    return dados
+
+  } catch (erro) {
+
+    console.error("Erro ao buscar dolar:", erro)
+    return []
+
+  }
+}

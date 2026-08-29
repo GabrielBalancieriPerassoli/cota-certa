@@ -12,6 +12,6 @@ export type Ativo = {
 }
 
 export type ResultadoCarteira = {
-  carteira: AtivoComTipo[]
-  ativosNaoEncontrados: string[]
+    carteira: AtivoComTipo[]
+    ativosNaoEncontrados: string[]
 }
