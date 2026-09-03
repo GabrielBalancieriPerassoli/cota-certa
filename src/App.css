@@ -182,3 +182,51 @@
     border-right-color: var(--border);
   }
 }
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: #13233A;
+  padding: 20px 16px;
+  border-right: 1px solid rgba(233, 240, 248, 0.1);
+}
+
+.sidebar h1 {
+  color: #CBA35A;
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar button {
+  background: none;
+  border: none;
+  color: #8B9BB3;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar button:hover {
+  background: #1B2E4A;
+  color: #EAF0F8;
+}
+
+.conteudo {
+  flex: 1;
+  padding: 28px;
+  background: #0D1826;
+  color: #EAF0F8;
+}

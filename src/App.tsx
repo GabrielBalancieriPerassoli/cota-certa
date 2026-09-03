@@ -7,6 +7,7 @@ import { GraficoComposicao } from './components/ui/GraficoComposicao'
 import type { AtivoComTipo, TipoAtivo } from './components/utils/tipos'
 import { buscarCarteira, buscaDolar } from './components/utils/api'
 import { DialogExibeErro } from './components/ui/DialogExibeErro'
+import './App.css'
 
 function App() {
   const [dolar, setDolar] = useState("")
@@ -91,72 +92,77 @@ function App() {
             onClose={() => setErro(null)}
           />
       )}
-      <h1>CotaCerta</h1>
-      <nav>
-        <button onClick={() => setTela("dashboard")}>Dashboard</button>
-        <button onClick={() => setTela("carteira")}>Carteira</button>
-        <button onClick={() => setTela("analise")}>Análise</button>
-        <button onClick={() => setTela("acoes")}>Ações</button>
-        <button onClick={() => setTela("fii")}>FIIs</button>
-        <button onClick={() => setTela("rendafixa")}>Renda Fixa</button>
-        <button onClick={buscaDolar}>Buscar dólar</button>
-        <p>Dólar: {dolar}</p>
-      </nav>
+      <div className="app">
+        <aside className="sidebar">
+            <h1>CotaCerta</h1>
+              <nav>
+                <button onClick={() => setTela("dashboard")}>Dashboard</button>
+                <button onClick={() => setTela("carteira")}>Carteira</button>
+                <button onClick={() => setTela("analise")}>Análise</button>
+                <button onClick={() => setTela("acoes")}>Ações</button>
+                <button onClick={() => setTela("fii")}>FIIs</button>
+                <button onClick={() => setTela("rendafixa")}>Renda Fixa</button>
+                <button onClick={buscaDolar}>Buscar dólar</button>
+                <p>Dólar: {dolar}</p>
+              </nav>
+        </aside>
+        <main className="conteudo">
+           {tela === "carteira" && (
+              <div>
+                {carteiraFiltrada.map((ativos) => (
+                  <Ativo 
+                    key={ativos.ticker}
+                    ticker={ativos.ticker}
+                    quantidade={ativos.quantidade}
+                    preco={ativos.preco}
+                    precoMedio={ativos.precoMedio}
+                    tipo={ativos.tipo}
+                  />
+                ))}
+              </div>
+            )}
 
-      {tela === "carteira" && (
-        <div>
-          {carteiraFiltrada.map((ativos) => (
-            <Ativo 
-              key={ativos.ticker}
-              ticker={ativos.ticker}
-              quantidade={ativos.quantidade}
-              preco={ativos.preco}
-              precoMedio={ativos.precoMedio}
-              tipo={ativos.tipo}
-            />
-          ))}
-        </div>
-      )}
+            {tela === "dashboard" && (
+              <div>
+                <h2>Você tem {ativos}  ativos - Patrimônio: {real.format(patrimonioTotal)}</h2>
+                <h3>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</h3>
+                <h3 style={{ color: lucro >= 0 ? "green" : "red" }}>Lucro: {real.format(lucro)}</h3>
+                <h3 style={{ color: rentabilidade >= 0 ? "green " : "red" }}>Rentabilidade: {rentabilidade.toFixed(2)}</h3>
+                <GraficoComposicao carteira={carteira} />
+              </div>
+            )}
 
-      {tela === "dashboard" && (
-        <div>
-          <h2>Você tem {ativos}  ativos - Patrimônio: {real.format(patrimonioTotal)}</h2>
-          <h3>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</h3>
-          <h3 style={{ color: lucro >= 0 ? "green" : "red" }}>Lucro: {real.format(lucro)}</h3>
-          <h3 style={{ color: rentabilidade >= 0 ? "green " : "red" }}>Rentabilidade: {rentabilidade.toFixed(2)}</h3>
-          <GraficoComposicao carteira={carteira} />
-        </div>
-      )}
+            {tela === "analise" && (
+              <div>
+                <h2>O total investido: {real.format(totalInvestido)}</h2>
+                <h2>A rentabilidade: {rentabilidade.toFixed(2)}</h2>
+                <h2>Total ativos: {ativos}</h2>
+                <h2>Ativo mais caro: {maiorPos.ticker}</h2>
+              </div>
+            )}
 
-      {tela === "analise" && (
-        <div>
-          <h2>O total investido: {real.format(totalInvestido)}</h2>
-          <h2>A rentabilidade: {rentabilidade.toFixed(2)}</h2>
-          <h2>Total ativos: {ativos}</h2>
-          <h2>Ativo mais caro: {maiorPos.ticker}</h2>
-        </div>
-      )}
+            {tela === "acoes" && (
+                <CarteiraPorTipo
+                  tipo="Ação"
+                  carteira={carteira}
+                />
+            )}
 
-      {tela === "acoes" && (
-          <CarteiraPorTipo
-            tipo="Ação"
-            carteira={carteira}
-          />
-      )}
+            {tela === "fii" && (
+                <CarteiraPorTipo
+                  tipo="FII"
+                  carteira={carteira}
+                />
+            )}
 
-      {tela === "fii" && (
-          <CarteiraPorTipo
-            tipo="FII"
-            carteira={carteira}
-          />
-      )}
-
-      {tela === "rendafixa" && (
-          <CarteiraPorTipo
-            tipo="Renda Fixa"
-            carteira={carteira}
-          />
-      )}
+            {tela === "rendafixa" && (
+                <CarteiraPorTipo
+                  tipo="Renda Fixa"
+                  carteira={carteira}
+                />
+            )}
+        </main>
+      </div>
     </>
   )
 }
