@@ -95,16 +95,16 @@ function App() {
       <div className="app">
         <aside className="sidebar">
             <h1>CotaCerta</h1>
-              <nav>
-                <button onClick={() => setTela("dashboard")}>Dashboard</button>
-                <button onClick={() => setTela("carteira")}>Carteira</button>
-                <button onClick={() => setTela("analise")}>Análise</button>
-                <button onClick={() => setTela("acoes")}>Ações</button>
-                <button onClick={() => setTela("fii")}>FIIs</button>
-                <button onClick={() => setTela("rendafixa")}>Renda Fixa</button>
-                <button onClick={buscaDolar}>Buscar dólar</button>
-                <p>Dólar: {dolar}</p>
-              </nav>
+            <nav>
+              <button onClick={() => setTela("dashboard")}>Dashboard</button>
+              <button onClick={() => setTela("carteira")}>Carteira</button>
+              <button onClick={() => setTela("analise")}>Análise</button>
+              <button onClick={() => setTela("acoes")}>Ações</button>
+              <button onClick={() => setTela("fii")}>FIIs</button>
+              <button onClick={() => setTela("rendafixa")}>Renda Fixa</button>
+              <button onClick={buscaDolar}>Buscar dólar</button>
+              <p>Dólar: {dolar}</p>
+            </nav>
         </aside>
         <main className="conteudo">
            {tela === "carteira" && (
@@ -124,11 +124,34 @@ function App() {
 
             {tela === "dashboard" && (
               <div>
-                <h2>Você tem {ativos}  ativos - Patrimônio: {real.format(patrimonioTotal)}</h2>
-                <h3>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</h3>
-                <h3 style={{ color: lucro >= 0 ? "green" : "red" }}>Lucro: {real.format(lucro)}</h3>
-                <h3 style={{ color: rentabilidade >= 0 ? "green " : "red" }}>Rentabilidade: {rentabilidade.toFixed(2)}</h3>
-                <GraficoComposicao carteira={carteira} />
+                <div className="cards">
+                  <div className="card">
+                    <span className="card-label">Patrimônio</span>
+                    <span className="card-valor">{real.format(patrimonioTotal)}</span>
+                  </div>
+
+                  <div className="card">
+                    <span className="card-label">Total investido</span>
+                    <span className="card-valor">{real.format(totalInvestido)}</span>
+                  </div>
+
+                  <div className="card">
+                    <span className="card-label">Lucro</span>
+                    <span className="card-valor" style={{ color: lucro >= 0 ? "#5CB88A" : "#DB7A56" }}>
+                      {real.format(lucro)}%
+                    </span>
+                  </div>
+
+                  <div className="card">
+                    <span className="card-label">Rentabilidade</span>
+                    <span className="card-valor" style={{ color: rentabilidade  >= 0 ? "#5CB88A" : "#DB7A56" }}>
+                      {rentabilidade.toFixed(2)}%
+                    </span>
+                  </div>
+
+                  <p>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</p>
+                  <GraficoComposicao carteira={carteira} />
+                </div>
               </div>
             )}
 
