@@ -1,0 +1,42 @@
+.composicao {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.composicao-grafico {
+  width: 260px;      
+  flex: none;      
+}
+
+.composicao-legenda {
+  flex: 1;
+  min-width: 160px;
+  max-width: 240px;
+}
+
+.composicao-legenda .linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.composicao-legenda .cor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.composicao-legenda .nome {
+  flex: 1;
+  color: #8B9BB3;
+}
+
+.composicao-legenda .pct {
+  font-family: "IBM Plex Mono", monospace;
+  color: #EAF0F8;
+}

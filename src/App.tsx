@@ -138,7 +138,7 @@ function App() {
                   <div className="card">
                     <span className="card-label">Lucro</span>
                     <span className="card-valor" style={{ color: lucro >= 0 ? "#5CB88A" : "#DB7A56" }}>
-                      {real.format(lucro)}%
+                      {real.format(lucro)}
                     </span>
                   </div>
 
@@ -150,7 +150,11 @@ function App() {
                   </div>
 
                   <p>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</p>
-                  <GraficoComposicao carteira={carteira} />
+                </div>
+                <div className="cards">
+                  <div className="card">
+                    <GraficoComposicao carteira={carteira} />
+                  </div>
                 </div>
               </div>
             )}
