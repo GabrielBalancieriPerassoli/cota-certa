@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { calcularPatrimonio, calcularInvestido } from './components/utils/calculos'
 import CarteiraPorTipo from './components/ui/CarteiraPorTipo'
 import { GraficoComposicao } from './components/ui/GraficoComposicao'
+import { GraficoEvolucao } from './components/ui/GraficoEvolucao'
 import type { AtivoComTipo, TipoAtivo } from './components/utils/tipos'
 import { buscarCarteira, buscaDolar } from './components/utils/api'
 import { DialogExibeErro } from './components/ui/DialogExibeErro'
@@ -151,9 +152,14 @@ function App() {
 
                   <p>{fiis} FIIs, {acoes} Ações, {rendaFixa} Renda Fixa</p>
                 </div>
+
                 <div className="cards">
                   <div className="card">
                     <GraficoComposicao carteira={carteira} />
+                  </div>
+
+                  <div className="card">
+                    <GraficoEvolucao carteira={carteira} />
                   </div>
                 </div>
               </div>
